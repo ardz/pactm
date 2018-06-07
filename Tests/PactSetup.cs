@@ -67,7 +67,7 @@ namespace Tests
 
         public PactSetup CreateMockService()
         {
-            MockMessageService = PactBuilder.MockService(MockServerPort);
+            // MockMessageService = PactBuilder.MockService(MockServerPort);
 
             MockMessageService = PactBuilder.MockService(MockServerPort, new JsonSerializerSettings());
 

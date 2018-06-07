@@ -55,35 +55,36 @@ namespace Tests
             // expects to receive from the achievement service
 
             MockMessageService.Given("There is a new a message in the achievements queue")
-                .UponReceiving("The message")
+                .UponReceiving("A request to process the message")
                 .With(new ProviderServiceRequest
                 {
                     // Define what the message should contain
-                    Method = HttpVerb.Get,
-                    Path = "/mock/Message",
+                    Method = HttpVerb.Get, // hide in base class
+                    Path = "/servicebusmock/message",
                     Headers = new Dictionary<string, object>
                     {
                         {"Content-Type", "application/json"}
                     },
+                    Query = ""
                 })
                 .WillRespondWith(new ProviderServiceResponse
                 {
                     Status = 200,
                     Headers = new Dictionary<string, object>()
                     {
-                        {"Content-Type", "application/json; charset=utf-8"}
+                        {"Content-Type", "application/json"}
                     },
                     Body =
                         new
                         {
+                            CertificateId = "ae553ab2-51f1-40f0-81eb-95e46205d6e5",
+                            LearnerId = "3bb86580-aef6-4526-81e7-35bb22a4390e",
                             CorrelationId = "2b07dd51-1a63-4834-9311-36667ec89f51",
                             Type = "Achievement",
-                            CertificateId = "ae553ab2-51f1-40f0-81eb-95e46205d6e5",
-                            LearnerId = "3bb86580-aef6-4526-81e7-35bb22a4390e"
                         }
                 });
 
-            Client.Get("/mock/Message/", HttpStatusCode.OK);
+            Client.Get("/servicebusmock/message", HttpStatusCode.OK);
 
             MockMessageService.VerifyInteractions();
             MockMessageService.ClearInteractions();
