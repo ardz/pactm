@@ -11,13 +11,14 @@ using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
+using PactNet.Mocks.MockHttpService;
 using PactNet.Mocks.MockHttpService.Models;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Tests
 {
-    public class Tests : PactSetup, IDisposable
+    public class Tests : PactMessageSetup, IDisposable
     {
         private readonly ITestOutputHelper _output;
 
@@ -40,10 +41,10 @@ namespace Tests
             PactBuilder.Build();
 
             // send it up to the broker
-            //var pactPublisher = new PactPublisher("https://pecktest.pact.dius.com.au/",
-            //    new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"));
-            //pactPublisher.PublishToBroker($"{PactDirectory}\\{PactFilename}.json",
-            //    PactVersion, new[] {"master"});
+            var pactPublisher = new PactPublisher("https://pecktest.pact.dius.com.au/",
+                new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"));
+            pactPublisher.PublishToBroker($"{PactDirectory}\\{PactFilename}.json",
+                PactVersion, new[] { "master" });
         }
 
         [Fact]
@@ -63,7 +64,7 @@ namespace Tests
                     Path = "/servicebusmock/message",
                     Headers = new Dictionary<string, object>
                     {
-                        {"Content-Type", "application/json"}
+                        {"Accept", "application/json"}
                     },
                     Query = ""
                 })
@@ -72,7 +73,7 @@ namespace Tests
                     Status = 200,
                     Headers = new Dictionary<string, object>()
                     {
-                        {"Content-Type", "application/json"}
+                        {"Content-Type", "application/json; charset=utf-8"}
                     },
                     Body =
                         new
@@ -88,6 +89,24 @@ namespace Tests
 
             MockMessageService.VerifyInteractions();
             MockMessageService.ClearInteractions();
+        }
+
+        [Fact]
+        public void SweetBabyJesus()
+        {
+            dynamic messageContract = new
+            {
+                CertificateId = "ae553ab2-51f1-40f0-81eb-95e46205d6e5",
+                LearnerId = "3bb86580-aef6-4526-81e7-35bb22a4390e",
+                CorrelationId = "2b07dd51-1a63-4834-9311-36667ec89f51",
+                Type = "Achievement",
+            };
+
+            MockPreconditions(given: "There is a new achievement message in the queue",
+                    uponReceiving: "A request to process the message")
+                .MockExpectedResponse(messageContract)
+                .MockCheckResponse()
+                .MockVerifyAndClearInteractions();
         }
 
         [Fact]
