@@ -10,11 +10,11 @@ namespace Tests.ApiTestClient
     public class Client
     {
         private HttpClient _client;
-        public string BaseUri;
+        private readonly string _baseUri;
 
         public Client(string baseUri = null)
         {
-            BaseUri = baseUri ?? "http://localhost:1234";
+            _baseUri = baseUri ?? "http://localhost:1234";
         }
 
         /// <summary>
@@ -68,11 +68,11 @@ namespace Tests.ApiTestClient
         /// <param name="endpoint"></param>
         /// <param name="headers"></param>
         /// <returns></returns>
-        public HttpResponseMessage MakeRequest(HttpMethod method, string endpoint, IReadOnlyList<string> headers = null)
+        private HttpResponseMessage MakeRequest(HttpMethod method, string endpoint, IReadOnlyList<string> headers = null)
         {
-            using (_client = new HttpClient { BaseAddress = new Uri(BaseUri) })
+            using (_client = new HttpClient { BaseAddress = new Uri(_baseUri) })
             {
-                var request = new HttpRequestMessage(method, BaseUri + endpoint);
+                var request = new HttpRequestMessage(method, _baseUri + endpoint);
 
                 if (headers == null)
                 {

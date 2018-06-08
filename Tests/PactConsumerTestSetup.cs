@@ -1,34 +1,44 @@
-﻿using System.Collections.Generic;
-using System.Net;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PactNet;
 using PactNet.Mocks.MockHttpService;
 using PactNet.Mocks.MockHttpService.Models;
+using System.Collections.Generic;
+using System.Net;
 using Tests.ApiTestClient;
+using Xunit.Abstractions;
 
 namespace Tests
 {
-    public class PactMessageSetup
+    public class PactConsumerTestSetup
     {
-        public const string PactDirectory = @"C:\PactFiles";
+        private readonly ITestOutputHelper _output;
+        public string Consumer { get; private set; }
+        public string Provider { get; private set; }
+        public static string PactFilename { get; private set; }
+        public const string PactBrokerUri = "https://pecktest.pact.dius.com.au/";
+        private static string MockMessageServiceBaseUri => $"http://localhost:{MockServerPort}";
+        public string PactsDirectory { get; private set; }
         public static ProviderServiceRequest Request;
         public static Client Client;
         public static IPactBuilder PactBuilder { get; private set; }
         public static IMockProviderService MockMessageService { get; private set; }
         public static int MockServerPort { get; set; }
-        private static string Consumer { get; set; }
-        private static string Provider { get; set; }
-        public static string PactFilename { get; set; }
-        private static string MockMessageServiceBaseUri => $"http://localhost:{MockServerPort}";
         public static string PactVersion { get; set; }
 
-        public PactMessageSetup CreatePactBuilder()
+        public PactConsumerTestSetup(ITestOutputHelper output)
         {
+            _output = output;
+        }
+
+        public PactConsumerTestSetup CreatePactBuilder(string pactsDirectory)
+        {
+            PactsDirectory = pactsDirectory;
+
             PactBuilder = new PactBuilder(new PactConfig
             {
                 SpecificationVersion = "2.0.0",
-                PactDir = PactDirectory,
-                LogDir = PactDirectory
+                PactDir = pactsDirectory,
+                LogDir = PactsDirectory
             });
 
             return this;
@@ -39,14 +49,14 @@ namespace Tests
         /// the expected interactions defined
         /// within the test methods of the derived class
         /// </summary>
-        public PactMessageSetup SetPactVersion(string version)
+        public PactConsumerTestSetup SetPactVersion(string version)
         {
             PactVersion = version;
 
             return this;
         }
 
-        public PactMessageSetup SetConsumerProviderNames(string cosumer, string provider)
+        public PactConsumerTestSetup SetConsumerProviderNames(string cosumer, string provider)
         {
             Provider = provider.Replace(" ", "_").ToLower();
             Consumer = cosumer.Replace(" ", "_").ToLower();
@@ -57,38 +67,44 @@ namespace Tests
                 .ServiceConsumer(cosumer)
                 .HasPactWith(provider);
 
+            _output.WriteLine("Starting PACT File creation for " + Provider + " and " + Consumer);
+
             return this;
         }
 
-        public PactMessageSetup SetMockServerPort(int port)
+        public PactConsumerTestSetup SetMockServerPort(int port)
         {
             MockServerPort = port;
 
             return this;
         }
 
-        public PactMessageSetup CreateMockService()
+        public PactConsumerTestSetup CreateMockService()
         {
             MockMessageService = PactBuilder.MockService(MockServerPort, new JsonSerializerSettings());
+
+            _output.WriteLine("Created Mock Service.");
 
             return this;
         }
 
-        public PactMessageSetup CreateProviderServiceRequest()
+        public PactConsumerTestSetup CreateProviderServiceRequest()
         {
             Request = new ProviderServiceRequest();
 
             return this;
         }
 
-        public PactMessageSetup CreateTestClient()
+        public PactConsumerTestSetup CreateTestClient()
         {
             Client = new Client(MockMessageServiceBaseUri);
+
+            _output.WriteLine("Created Test Client at " + MockMessageServiceBaseUri);
 
             return this;
         }
 
-        public PactMessageSetup MockPreconditions(string given, string uponReceiving)
+        public PactConsumerTestSetup MockPreconditions(string given, string uponReceiving)
         {
             MockMessageService.Given(given)
                 .UponReceiving(uponReceiving)
@@ -106,7 +122,7 @@ namespace Tests
             return this;
         }
 
-        public PactMessageSetup MockExpectedResponse(dynamic messageContract)
+        public PactConsumerTestSetup MockExpectedResponse(dynamic messageContract)
         {
             MockMessageService
                 .WillRespondWith(new ProviderServiceResponse
@@ -122,17 +138,35 @@ namespace Tests
             return this;
         }
 
-        public PactMessageSetup MockCheckResponse(string path)
+        public PactConsumerTestSetup MockCheckResponse(string path)
         {
             Client.Get(path, HttpStatusCode.OK);
 
             return this;
         }
 
-        public PactMessageSetup MockVerifyAndClearInteractions()
+        public PactConsumerTestSetup MockVerifyAndClearInteractions()
         {
             MockMessageService.VerifyInteractions();
+            _output.WriteLine("Interactions Verified.");
             MockMessageService.ClearInteractions();
+            _output.WriteLine("Interactions Cleared.");
+
+            return this;
+        }
+
+        public PactConsumerTestSetup WriteAndPublishPact()
+        {
+            PactBuilder.Build();
+            _output.WriteLine("Finished writing PACT file to disk (" + PactsDirectory + ")");
+
+            // send it up to the broker
+            var pactPublisher = new PactPublisher(PactBrokerUri,
+                new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"));
+            pactPublisher.PublishToBroker($"{PactsDirectory}\\{PactFilename}.json",
+                PactVersion, new[] {"master"});
+
+            _output.WriteLine("Finished publishing PACT to broker (" + PactBrokerUri + ")");
 
             return this;
         }

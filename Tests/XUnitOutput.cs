@@ -3,6 +3,7 @@ using Xunit.Abstractions;
 
 namespace Tests
 {
+    // XUnit output helper class for use with PACT library outputters.
     public class XUnitOutput : IOutput
     {
         private readonly ITestOutputHelper _output;
