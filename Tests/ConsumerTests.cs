@@ -29,7 +29,7 @@ namespace Tests
 
             CreatePactBuilder(@"C:\PactFiles")
                 .SetConsumerProviderNames(ServiceConsumer, ServiceProvider)
-                .SetPactVersion("1.0")
+                .SetConsumerServiceVersion("1.0.0")
                 .SetMockServerPort(9222)
                 .CreateMockService()
                 .CreateTestClient();
