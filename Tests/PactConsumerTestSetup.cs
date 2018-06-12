@@ -15,7 +15,7 @@ namespace Tests
         public string Consumer { get; private set; }
         public string Provider { get; private set; }
         public static string PactFilename { get; private set; }
-        public const string PactBrokerUri = "https://pecktest.pact.dius.com.au/pacts";
+        public const string PactBrokerBaseUri = "https://pecktest.pact.dius.com.au/pacts";
         public string PactUri { get; private set; }
         private static string MockMessageServiceBaseUri => $"http://localhost:{MockServerPort}";
         public string PactsDirectory { get; private set; }
@@ -50,27 +50,27 @@ namespace Tests
         /// the expected interactions defined
         /// within the test methods of the derived class
         /// </summary>
-        public PactConsumerTestSetup SetConsumerServiceVersion(string version)
+        public PactConsumerTestSetup SetConsumerVersion(string version)
         {
             ConsumerServiceVersion = version;
 
             return this;
         }
 
-        public PactConsumerTestSetup SetConsumerProviderNames(string cosumer, string provider)
+        public PactConsumerTestSetup SetConsumerProviderNames(string consumer, string provider)
         {
             Provider = provider.Replace(" ", "_").ToLower();
-            Consumer = cosumer.Replace(" ", "_").ToLower();
+            Consumer = consumer.Replace(" ", "_").ToLower();
 
             PactFilename = $"{Consumer}-{Provider}";
 
             PactBuilder
-                .ServiceConsumer(cosumer)
+                .ServiceConsumer(consumer)
                 .HasPactWith(provider);
 
             _output.WriteLine("Starting PACT File creation for " + Provider + " and " + Consumer);
 
-            var consumerUri = "/consumer/" + cosumer.Replace(" ", "%20");
+            var consumerUri = "/consumer/" + consumer.Replace(" ", "%20");
             var providerUri = "/provider/" + provider.Replace(" ", "%20");
 
             PactUri = providerUri + consumerUri + "/latest";
@@ -167,12 +167,12 @@ namespace Tests
             _output.WriteLine("Finished writing PACT file to disk (" + PactsDirectory + ")");
 
             // send it up to the broker
-            var pactPublisher = new PactPublisher(PactBrokerUri + PactUri,
+            var pactPublisher = new PactPublisher(PactBrokerBaseUri + PactUri,
                 new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"));
             pactPublisher.PublishToBroker($"{PactsDirectory}\\{PactFilename}.json",
                 ConsumerServiceVersion, new[] {"master"});
 
-            _output.WriteLine("Finished publishing PACT to broker (" + PactBrokerUri + ")");
+            _output.WriteLine("Finished publishing PACT to broker (" + PactBrokerBaseUri + PactUri + ")");
 
             return this;
         }
