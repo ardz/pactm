@@ -10,7 +10,7 @@ using PactNet;
 using PactNet.Infrastructure.Outputters;
 using Xunit.Abstractions;
 
-namespace Tests
+namespace Tests.Provider
 {
     /// <summary>
     /// Wrapper code for provider Pact tests

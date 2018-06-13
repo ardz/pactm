@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.Net;
+using Newtonsoft.Json;
 using PactNet;
 using PactNet.Mocks.MockHttpService;
 using PactNet.Mocks.MockHttpService.Models;
-using System.Collections.Generic;
-using System.Net;
 using Tests.ApiTestClient;
 using Xunit.Abstractions;
 
-namespace Tests
+namespace Tests.Consumer
 {
     /// <summary>
     /// Wrapper code for consumer Pact tests
