@@ -59,7 +59,7 @@ namespace Tests.Provider
             var message = JsonConvert.SerializeObject(messageContract);
 
             ProviderSetupMockResponseForMessage(message, "http://localhost:9223")
-                .ProviderVerifyPact();
+            .ProviderVerifyPact();
         }
     }
 }

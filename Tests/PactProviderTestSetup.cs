@@ -1,9 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
 using Xunit.Abstractions;
@@ -68,17 +72,53 @@ namespace Tests
             _mockUri = uri;
 
             _mockService = WebHost.CreateDefaultBuilder(null)
-                .UseStartup<Startup>()
                 .UseUrls(_mockUri)
-                .Configure(app => { app.Run(async context => { await context.Response.WriteAsync(message); }); })
+                .Configure(app =>
+                {
+                    // Add app/json header
+                    app.Use(async (context, nextMiddleware) =>
+                    {
+                        context.Response.OnStarting(() =>
+                        {
+                            context.Response.Headers.Add("Content-Type", "application/json; charset=utf-8");
+                            return Task.FromResult(0);
+                        });
+                        await nextMiddleware();
+                    });
+                    app.Use(async (context, nextMiddleware) =>
+                    {
+                        using (var memory = new MemoryStream())
+                        {
+                            var originalStream = context.Response.Body;
+                            context.Response.Body = memory;
+
+                            await nextMiddleware();
+
+                            memory.Seek(0, SeekOrigin.Begin);
+                            var content = new StreamReader(memory).ReadToEnd();
+                            memory.Seek(0, SeekOrigin.Begin);
+
+                            // add the body response header
+                            context.Response.Headers.Add("Body", content);
+
+                            await memory.CopyToAsync(originalStream);
+                            context.Response.Body = originalStream;
+                        }
+                    });
+                    app.Run(async context =>
+                    {
+                        await context
+                            .Response
+                            .WriteAsync(message);
+                    });
+                })
+                .ConfigureServices(services => { services.AddMvc(); })
                 .Build();
 
             _output.WriteLine("Mocking the following message format on " + _mockUri + " for Pact verifier:");
             _output.WriteLine(message);
 
             _mockService.Start();
-
-            //Task.Run(async () => await _mockService.StartAsync());
 
             return this;
         }
