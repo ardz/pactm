@@ -42,7 +42,7 @@ namespace Tests.Provider
             //};
 
             // var message = JsonConvert.SerializeObject(new EventCertificatePrinted(messageContract,
-                // new Guid("2b07dd51-1a63-4834-9311-36667ec89f51"), "Achievement"));
+            // new Guid("2b07dd51-1a63-4834-9311-36667ec89f51"), "Achievement"));
 
             // the provider test should pass here due to the way the data is structured
 
@@ -58,7 +58,8 @@ namespace Tests.Provider
             var message = JsonConvert.SerializeObject(messageContract);
 
             ProviderSetupMockResponseForMessage(message, "http://localhost:9223")
-            .ProviderVerifyPact();
+                .ProviderVerifyPact(description: "A request to process the message",
+                    providerState: "There is a new achievement message in the queue");
         }
     }
 }

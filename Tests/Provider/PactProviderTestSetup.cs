@@ -119,12 +119,12 @@ namespace Tests.Provider
             _output.WriteLine("Mocking the following message format on " + _mockUri + " for Pact verifier:");
             _output.WriteLine(message);
 
-            _mockService.Start();
+            Task.Run(async () => await _mockService.StartAsync());
 
             return this;
         }
 
-        public PactProviderTestSetup ProviderVerifyPact()
+        public PactProviderTestSetup ProviderVerifyPact(string description, string providerState)
         {
             _pactVerifierConfig = new PactVerifierConfig
             {
@@ -156,8 +156,8 @@ namespace Tests.Provider
                 .PactUri(
                     PactBrokerBaseUri + _pactUri,
                     new PactUriOptions("user", "pass"))
-                .Verify(description: "A request to process the message",
-                    providerState: "There is a new achievement message in the queue");
+                .Verify(description: description,
+                    providerState: providerState);
 
             Task.Run(async () => await _mockService.StopAsync());
 
