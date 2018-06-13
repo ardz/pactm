@@ -171,7 +171,7 @@ namespace Tests
 
             // send it up to the broker
             var pactPublisher = new PactPublisher(PactBrokerBaseUri + PactUri,
-                new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"));
+                new PactUriOptions("user", "pass"));
             pactPublisher.PublishToBroker($"{PactsDirectory}\\{PactFilename}.json",
                 ConsumerServiceVersion, new[] {"master"});
 
