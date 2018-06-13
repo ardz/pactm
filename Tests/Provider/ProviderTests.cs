@@ -1,12 +1,11 @@
 ﻿using System;
-using Events;
-using Events.EventData;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Tests.Provider
 {
+    /// <inheritdoc cref="PactProviderTestSetup" />
     /// <summary>
     /// Provider contract tests. These would live with the actual
     /// provider microservice code/solution

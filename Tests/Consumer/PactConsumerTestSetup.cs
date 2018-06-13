@@ -9,6 +9,9 @@ using Xunit.Abstractions;
 
 namespace Tests
 {
+    /// <summary>
+    /// Wrapper code for consumer Pact tests
+    /// </summary>
     public class PactConsumerTestSetup
     {
         private readonly ITestOutputHelper _output;

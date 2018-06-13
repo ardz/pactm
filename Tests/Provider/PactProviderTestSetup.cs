@@ -3,10 +3,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
@@ -14,6 +12,9 @@ using Xunit.Abstractions;
 
 namespace Tests
 {
+    /// <summary>
+    /// Wrapper code for provider Pact tests
+    /// </summary>
     public class PactProviderTestSetup
     {
         private readonly ITestOutputHelper _output;

@@ -4,6 +4,11 @@ using Xunit.Abstractions;
 
 namespace Tests.Consumer
 {
+    /// <inheritdoc cref="PactConsumerTestSetup" />
+    /// <summary>
+    /// Consumer tests. Tests specify the contracts they
+    /// expect the Providers to adhere to.
+    /// </summary>
     public class ConsumerTests : PactConsumerTestSetup, IDisposable
     {
         private readonly ITestOutputHelper _output;
