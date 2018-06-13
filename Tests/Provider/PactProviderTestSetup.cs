@@ -155,7 +155,7 @@ namespace Tests.Provider
                 .HonoursPactWith(_consumerServiceName)
                 .PactUri(
                     PactBrokerBaseUri + _pactUri,
-                    new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"))
+                    new PactUriOptions("user", "pass"))
                 .Verify(description: "A request to process the message",
                     providerState: "There is a new achievement message in the queue");
 
