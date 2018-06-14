@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Tests.Traits;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,6 +32,8 @@ namespace Tests.Provider
         }
 
         [Fact]
+        [Provider]
+        [Contract]
         public void CheckProviderHonoursPactWithConsumer()
         {
             // the provider test would fail due to the way the data is structured here
@@ -42,7 +45,7 @@ namespace Tests.Provider
             //};
 
             // var message = JsonConvert.SerializeObject(new EventCertificatePrinted(messageContract,
-            // new Guid("2b07dd51-1a63-4834-9311-36667ec89f51"), "Achievement"));
+                // new Guid("2b07dd51-1a63-4834-9311-36667ec89f51"), "Achievement"));
 
             // the provider test should pass here due to the way the data is structured
 
@@ -52,7 +55,9 @@ namespace Tests.Provider
                 LearnerId = "3bb86580-aef6-4526-81e7-35bb22a4390e",
                 CorrelationId = "2b07dd51-1a63-4834-9311-36667ec89f51",
                 Type = "Achievement",
-                NewField = "Foobar"
+                NewField = "Foobar",
+                SomeOtherField = "Cheese",
+                MyFieldIsntGoodEnoughForRichard = "TEst better name than that"
             };
 
             var message = JsonConvert.SerializeObject(messageContract);

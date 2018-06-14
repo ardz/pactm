@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -86,28 +85,10 @@ namespace Tests.Provider
                         });
                         await nextMiddleware();
                     });
-                    app.Use(async (context, nextMiddleware) =>
-                    {
-                        using (var memory = new MemoryStream())
-                        {
-                            var originalStream = context.Response.Body;
-                            context.Response.Body = memory;
-
-                            await nextMiddleware();
-
-                            memory.Seek(0, SeekOrigin.Begin);
-                            var content = new StreamReader(memory).ReadToEnd();
-                            memory.Seek(0, SeekOrigin.Begin);
-
-                            // add the body response header
-                            context.Response.Headers.Add("Body", content);
-
-                            await memory.CopyToAsync(originalStream);
-                            context.Response.Body = originalStream;
-                        }
-                    });
                     app.Run(async context =>
                     {
+                        // mock the message/contract when the uri
+                        // specified recieves a GET
                         await context
                             .Response
                             .WriteAsync(message);
@@ -155,7 +136,7 @@ namespace Tests.Provider
                 .HonoursPactWith(_consumerServiceName)
                 .PactUri(
                     PactBrokerBaseUri + _pactUri,
-                    new PactUriOptions("user", "pass"))
+                    new PactUriOptions("vUSQ9aXyftgjK5yuTkUcpertuiP5Pk", "2OcpDlI0uHV8Y5tbVuyvtxTyS0gdDfRw"))
                 .Verify(description: description,
                     providerState: providerState);
 

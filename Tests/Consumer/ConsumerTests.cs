@@ -1,4 +1,5 @@
 using System;
+using Tests.Traits;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,6 +36,8 @@ namespace Tests.Consumer
         }
 
         [Fact]
+        [Consumer]
+        [Contract]
         public void ConsumerSetsMessageExpectation()
         {
             dynamic messageContract = new
@@ -43,7 +46,8 @@ namespace Tests.Consumer
                 LearnerId = "3bb86580-aef6-4526-81e7-35bb22a4390e",
                 CorrelationId = "2b07dd51-1a63-4834-9311-36667ec89f51",
                 Type = "Achievement",
-                NewField = "Foobar"
+                NewField = "Foobar",
+                SomeOtherField = "Cheese"
             };
             
             MockPreconditions(given: "There is a new achievement message in the queue",
